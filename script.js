@@ -38,13 +38,30 @@ const BRANDS = [
 ];
 
 const fmtPrice = n => "$" + n.toLocaleString("en-US");
-const carVisualSVG = () => `
+
+/* slug used to look up a real photo, e.g. images/lamborghini-revuelto.jpg */
+const slugify = car => `${car.brand}-${car.name}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+const carVisualSilhouette = () => `
   <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
     <path d="M40 230 C60 180 120 170 175 168 C210 130 260 95 330 90 C400 84 470 90 520 105 C560 60 640 45 700 60 C760 74 800 110 835 150 C860 155 875 175 875 200 C875 220 862 232 840 234 L 800 234 C800 205 776 182 748 182 C720 182 696 205 696 234 L 250 234 C250 205 226 182 198 182 C170 182 146 205 146 234 L 70 234 C50 234 38 224 40 230 Z" stroke="currentColor" stroke-width="3"/>
     <circle cx="198" cy="234" r="34" stroke="currentColor" stroke-width="3.5"/>
     <circle cx="748" cy="234" r="34" stroke="currentColor" stroke-width="3.5"/>
     <path d="M330 90 C360 128 400 140 460 140 C520 140 560 120 590 95" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
   </svg>`;
+
+/* Renders a real <img> for the car if a photo exists at images/<slug>.jpg (or .jpg/.png/.webp),
+   and silently falls back to the drawn silhouette if it 404s or none has been added yet. */
+function carVisualMarkup(car, opts){
+  const slug = slugify(car);
+  const lazy = opts && opts.eager ? '' : 'loading="lazy"';
+  return `
+    <div class="car-photo-wrap">
+      <img class="car-photo" src="images/${slug}.jpg" alt="${car.brand} ${car.name}" ${lazy}
+           onerror="this.closest('.car-photo-wrap').classList.add('photo-missing'); this.remove();">
+      <div class="car-photo-fallback">${carVisualSilhouette()}</div>
+    </div>`;
+}
 
 let state = { filtered: [...CARS] };
 
@@ -170,7 +187,7 @@ function renderGrid(list){
         <span class="car-brand">${car.brand}</span>
         <span class="car-year">${car.year}</span>
       </div>
-      <div class="car-visual">${carVisualSVG()}</div>
+      <div class="car-visual">${carVisualMarkup(car)}</div>
       <h3 class="car-name">${car.name}</h3>
       <p class="car-price">${fmtPrice(car.price)}</p>
       <div class="car-specs-mini">
@@ -277,7 +294,7 @@ function openModal(id){
   const car = CARS.find(c => c.id === id);
   if (!car) return;
   modalContent.innerHTML = `
-    <div class="modal-visual">${carVisualSVG()}</div>
+    <div class="modal-visual">${carVisualMarkup(car, { eager: true })}</div>
     <p class="modal-brand">${car.brand}</p>
     <h2 class="modal-name">${car.name}</h2>
     <p class="modal-desc">${car.desc}</p>
@@ -382,7 +399,7 @@ function renderCompare(){
 }
 function compareCardHTML(car){
   return `
-    <div class="car-visual">${carVisualSVG()}</div>
+    <div class="car-visual">${carVisualMarkup(car)}</div>
     <span class="car-brand">${car.brand}</span>
     <h3 class="car-name">${car.name}</h3>
     <p class="car-price">${fmtPrice(car.price)}</p>
