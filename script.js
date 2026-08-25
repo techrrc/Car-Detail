@@ -190,85 +190,85 @@ document.querySelector('.hero').addEventListener('mousemove', e => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(32, 900/320, 1, 2000);
-  camera.position.set(40, 55, 260);
-  camera.lookAt(0, -6, 0);
+  const camera = new THREE.PerspectiveCamera(30, 900/320, 1, 2000);
+  camera.position.set(60, 60, 340);
+  camera.lookAt(0, 0, 0);
 
-  /* lighting: soft ambient + blue key light + red rim light, matching the site's accent palette */
-  scene.add(new THREE.AmbientLight(0x30323d, 1.1));
-  const key = new THREE.DirectionalLight(0xaebbff, 1.6);
-  key.position.set(140, 180, 200);
+  /* lighting: brighter ambient + strong blue key light + red rim light, matching the site's accent palette */
+  scene.add(new THREE.AmbientLight(0x5a5f70, 1.2));
+  scene.add(new THREE.HemisphereLight(0x6f7bff, 0x0a0a0c, 0.6));
+  const key = new THREE.DirectionalLight(0xd7deff, 2.2);
+  key.position.set(160, 220, 220);
   scene.add(key);
-  const rim = new THREE.PointLight(0xe63946, 1.4, 900);
-  rim.position.set(-160, 60, -140);
+  const rim = new THREE.PointLight(0xe63946, 2.2, 1200);
+  rim.position.set(-220, 90, -180);
   scene.add(rim);
-  const fill = new THREE.PointLight(0x3d5afe, 1.1, 900);
-  fill.position.set(200, -40, 120);
+  const fill = new THREE.PointLight(0x3d5afe, 1.8, 1200);
+  fill.position.set(240, -20, 160);
   scene.add(fill);
 
-  /* build the car body by extruding the same silhouette used in the drawn logo, so the
-     3D piece and the 2D brand mark are literally the same shape given real depth */
+  /* build a simple, deliberately convex/closed wedge-car profile (safe to extrude —
+     the flat brand-mark path is a stroke outline with concave wheel-arch notches that
+     don't triangulate cleanly as a solid fill, so this is a purpose-built solid shape) */
   const shape = new THREE.Shape();
-  shape.moveTo(40, -230);
-  shape.bezierCurveTo(60, -180, 120, -170, 175, -168);
-  shape.bezierCurveTo(210, -130, 260, -95, 330, -90);
-  shape.bezierCurveTo(400, -84, 470, -90, 520, -105);
-  shape.bezierCurveTo(560, -60, 640, -45, 700, -60);
-  shape.bezierCurveTo(760, -74, 800, -110, 835, -150);
-  shape.bezierCurveTo(860, -155, 875, -175, 875, -200);
-  shape.bezierCurveTo(875, -220, 862, -232, 840, -234);
-  shape.lineTo(800, -234);
-  shape.bezierCurveTo(800, -205, 776, -182, 748, -182);
-  shape.bezierCurveTo(720, -182, 696, -205, 696, -234);
-  shape.lineTo(250, -234);
-  shape.bezierCurveTo(250, -205, 226, -182, 198, -182);
-  shape.bezierCurveTo(170, -182, 146, -205, 146, -234);
-  shape.lineTo(70, -234);
-  shape.bezierCurveTo(50, -234, 38, -224, 40, -230);
+  shape.moveTo(-238, -25);
+  shape.quadraticCurveTo(-244, 3, -216, 16);
+  shape.quadraticCurveTo(-188, 38, -144, 39);
+  shape.quadraticCurveTo(-94, 40, -69, 44);
+  shape.quadraticCurveTo(-44, 75, 6, 88);
+  shape.quadraticCurveTo(56, 93, 106, 86);
+  shape.quadraticCurveTo(150, 80, 169, 56);
+  shape.quadraticCurveTo(188, 38, 206, 25);
+  shape.quadraticCurveTo(228, 13, 238, -6);
+  shape.lineTo(238, -25);
+  shape.lineTo(-238, -25);
   shape.closePath();
 
-  const DEPTH = 130;
-  const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: DEPTH, bevelEnabled: true, bevelThickness: 5, bevelSize: 4, bevelSegments: 3, curveSegments: 20 });
+  const DEPTH = 108;
+  const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: DEPTH, bevelEnabled: true, bevelThickness: 5, bevelSize: 4, bevelSegments: 3, curveSegments: 16 });
   bodyGeo.computeBoundingBox();
   const bb = bodyGeo.boundingBox;
   const cx = (bb.max.x + bb.min.x) / 2, cy = (bb.max.y + bb.min.y) / 2, cz = DEPTH / 2;
   bodyGeo.translate(-cx, -cy, -cz);
   bodyGeo.computeVertexNormals();
 
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x14151a, metalness: 0.85, roughness: 0.22 });
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x9aa1ad, metalness: 0.82, roughness: 0.25 });
   const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
 
+  /* a slim glowing beltline strip, echoing the blue/silver/red gradient of the 2D logo */
+  const stripeMat = new THREE.MeshStandardMaterial({ color: 0x3d5afe, emissive: 0x1c2a8a, emissiveIntensity: 0.7, metalness: 0.4, roughness: 0.3 });
+  const stripeGeo = new THREE.BoxGeometry(300, 4, DEPTH + 4);
+  const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+  stripe.position.set(-cx + -10, -cy + 42, 0);
+
   const carGroup = new THREE.Group();
-  carGroup.add(bodyMesh);
+  carGroup.add(bodyMesh, stripe);
 
-  /* wheels: single wide drum per axle (matches the 2-circle stylization of the flat logo) */
-  function addWheel(svgX, svgY){
-    const x = svgX - cx, y = -svgY - cy;
+  /* wheels: single wide drum per axle, seated on the underside of the body */
+  function addWheel(localX){
+    const x = localX, y = -25 - cy + 4;
     const wheelGroup = new THREE.Group();
-    const tireMat = new THREE.MeshStandardMaterial({ color: 0x0c0d10, metalness: 0.3, roughness: 0.65 });
-    const rimMat = new THREE.MeshStandardMaterial({ color: 0xc9ccd1, metalness: 0.95, roughness: 0.18 });
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x141519, metalness: 0.25, roughness: 0.6 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xd8dbe0, metalness: 0.95, roughness: 0.15 });
 
-    const tire = new THREE.Mesh(new THREE.CylinderGeometry(30, 30, DEPTH - 6, 24), tireMat);
+    const tire = new THREE.Mesh(new THREE.CylinderGeometry(40, 40, DEPTH + 6, 24), tireMat);
     tire.rotation.x = Math.PI / 2;
     wheelGroup.add(tire);
 
-    const rimTorus = new THREE.Mesh(new THREE.TorusGeometry(30, 2.6, 10, 28), rimMat);
-    const rimTorus2 = rimTorus.clone();
-    rimTorus.rotation.x = Math.PI / 2; rimTorus.position.z = -(DEPTH - 6) / 2;
-    rimTorus2.rotation.x = Math.PI / 2; rimTorus2.position.z = (DEPTH - 6) / 2;
-    wheelGroup.add(rimTorus, rimTorus2);
-
-    const hub = new THREE.Mesh(new THREE.TorusGeometry(13, 2, 8, 20), rimMat);
-    const hub2 = hub.clone();
-    hub.rotation.x = Math.PI / 2; hub.position.z = -(DEPTH - 6) / 2;
-    hub2.rotation.x = Math.PI / 2; hub2.position.z = (DEPTH - 6) / 2;
-    wheelGroup.add(hub, hub2);
+    [-(DEPTH + 6) / 2, (DEPTH + 6) / 2].forEach(z => {
+      const rimTorus = new THREE.Mesh(new THREE.TorusGeometry(40, 3, 10, 28), rimMat);
+      rimTorus.rotation.x = Math.PI / 2; rimTorus.position.z = z;
+      wheelGroup.add(rimTorus);
+      const hub = new THREE.Mesh(new THREE.TorusGeometry(16, 2.2, 8, 20), rimMat);
+      hub.rotation.x = Math.PI / 2; hub.position.z = z;
+      wheelGroup.add(hub);
+    });
 
     wheelGroup.position.set(x, y, 0);
     carGroup.add(wheelGroup);
   }
-  addWheel(198, 234);
-  addWheel(748, 234);
+  addWheel(-140);
+  addWheel(140);
 
   carGroup.rotation.y = -0.42;
   scene.add(carGroup);
