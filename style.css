@@ -196,6 +196,15 @@ svg{ width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 
   position: relative; width: min(900px, 90vw); margin-top: clamp(1rem, 4vw, 3rem);
   perspective: 1200px;
 }
+.hero-3d-canvas{
+  width: 100%; aspect-ratio: 900 / 320; display: block;
+  filter: drop-shadow(0 30px 45px rgba(0,0,0,.55));
+}
+/* hide the drawn fallback once the real 3D car has booted */
+.hero-visual.has-3d .car-silhouette{ display: none; }
+/* hide the canvas until 3D has actually booted, so the fallback shows first */
+.hero-3d-canvas{ display: none; }
+.hero-visual.has-3d .hero-3d-canvas{ display: block; }
 .car-silhouette{
   width: 100%; height: auto; color: var(--silver);
   filter: drop-shadow(0 30px 40px rgba(0,0,0,.6));

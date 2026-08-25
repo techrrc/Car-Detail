@@ -156,15 +156,172 @@ document.querySelectorAll('.tel-value').forEach(el => {
   obs.observe(el);
 });
 
-/* hero mouse parallax */
+/* hero mouse parallax (drives either the 3D car below, or the flat SVG fallback) */
 const heroVisual = document.getElementById('heroVisual');
 const carSil = document.getElementById('carSilhouette');
+let heroMouseX = 0, heroMouseY = 0;
 document.querySelector('.hero').addEventListener('mousemove', e => {
   const r = window.innerWidth, b = window.innerHeight;
-  const x = (e.clientX / r - .5) * 2, y = (e.clientY / b - .5) * 2;
-  carSil.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 4}deg) translateZ(0)`;
-  heroVisual.style.transform = `translate(${x * 10}px, ${y * 6}px)`;
+  heroMouseX = (e.clientX / r - .5) * 2;
+  heroMouseY = (e.clientY / b - .5) * 2;
+  if (!heroVisual.classList.contains('has-3d')) {
+    carSil.style.transform = `rotateY(${heroMouseX * 8}deg) rotateX(${-heroMouseY * 4}deg) translateZ(0)`;
+    heroVisual.style.transform = `translate(${heroMouseX * 10}px, ${heroMouseY * 6}px)`;
+  }
 });
+
+/* ==========================================================================
+   THREE.JS 3D HERO CAR — extrudes the brand silhouette into a real lit,
+   rotating 3D solid (turntable wobble + mouse-driven turn), so the hero
+   is an actual 3D scene rather than a flat drawing. Falls back silently
+   to the drawn SVG if WebGL/Three isn't available or motion is reduced.
+   ========================================================================== */
+(function initHeroCar(){
+  const canvas = document.getElementById('hero3d');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!window.THREE || reduceMotion || !canvas) return;
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  } catch (e) { return; }
+
+  const isMobile = window.innerWidth < 760;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, 900/320, 1, 2000);
+  camera.position.set(40, 55, 260);
+  camera.lookAt(0, -6, 0);
+
+  /* lighting: soft ambient + blue key light + red rim light, matching the site's accent palette */
+  scene.add(new THREE.AmbientLight(0x30323d, 1.1));
+  const key = new THREE.DirectionalLight(0xaebbff, 1.6);
+  key.position.set(140, 180, 200);
+  scene.add(key);
+  const rim = new THREE.PointLight(0xe63946, 1.4, 900);
+  rim.position.set(-160, 60, -140);
+  scene.add(rim);
+  const fill = new THREE.PointLight(0x3d5afe, 1.1, 900);
+  fill.position.set(200, -40, 120);
+  scene.add(fill);
+
+  /* build the car body by extruding the same silhouette used in the drawn logo, so the
+     3D piece and the 2D brand mark are literally the same shape given real depth */
+  const shape = new THREE.Shape();
+  shape.moveTo(40, -230);
+  shape.bezierCurveTo(60, -180, 120, -170, 175, -168);
+  shape.bezierCurveTo(210, -130, 260, -95, 330, -90);
+  shape.bezierCurveTo(400, -84, 470, -90, 520, -105);
+  shape.bezierCurveTo(560, -60, 640, -45, 700, -60);
+  shape.bezierCurveTo(760, -74, 800, -110, 835, -150);
+  shape.bezierCurveTo(860, -155, 875, -175, 875, -200);
+  shape.bezierCurveTo(875, -220, 862, -232, 840, -234);
+  shape.lineTo(800, -234);
+  shape.bezierCurveTo(800, -205, 776, -182, 748, -182);
+  shape.bezierCurveTo(720, -182, 696, -205, 696, -234);
+  shape.lineTo(250, -234);
+  shape.bezierCurveTo(250, -205, 226, -182, 198, -182);
+  shape.bezierCurveTo(170, -182, 146, -205, 146, -234);
+  shape.lineTo(70, -234);
+  shape.bezierCurveTo(50, -234, 38, -224, 40, -230);
+  shape.closePath();
+
+  const DEPTH = 130;
+  const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: DEPTH, bevelEnabled: true, bevelThickness: 5, bevelSize: 4, bevelSegments: 3, curveSegments: 20 });
+  bodyGeo.computeBoundingBox();
+  const bb = bodyGeo.boundingBox;
+  const cx = (bb.max.x + bb.min.x) / 2, cy = (bb.max.y + bb.min.y) / 2, cz = DEPTH / 2;
+  bodyGeo.translate(-cx, -cy, -cz);
+  bodyGeo.computeVertexNormals();
+
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x14151a, metalness: 0.85, roughness: 0.22 });
+  const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+
+  const carGroup = new THREE.Group();
+  carGroup.add(bodyMesh);
+
+  /* wheels: single wide drum per axle (matches the 2-circle stylization of the flat logo) */
+  function addWheel(svgX, svgY){
+    const x = svgX - cx, y = -svgY - cy;
+    const wheelGroup = new THREE.Group();
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x0c0d10, metalness: 0.3, roughness: 0.65 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xc9ccd1, metalness: 0.95, roughness: 0.18 });
+
+    const tire = new THREE.Mesh(new THREE.CylinderGeometry(30, 30, DEPTH - 6, 24), tireMat);
+    tire.rotation.x = Math.PI / 2;
+    wheelGroup.add(tire);
+
+    const rimTorus = new THREE.Mesh(new THREE.TorusGeometry(30, 2.6, 10, 28), rimMat);
+    const rimTorus2 = rimTorus.clone();
+    rimTorus.rotation.x = Math.PI / 2; rimTorus.position.z = -(DEPTH - 6) / 2;
+    rimTorus2.rotation.x = Math.PI / 2; rimTorus2.position.z = (DEPTH - 6) / 2;
+    wheelGroup.add(rimTorus, rimTorus2);
+
+    const hub = new THREE.Mesh(new THREE.TorusGeometry(13, 2, 8, 20), rimMat);
+    const hub2 = hub.clone();
+    hub.rotation.x = Math.PI / 2; hub.position.z = -(DEPTH - 6) / 2;
+    hub2.rotation.x = Math.PI / 2; hub2.position.z = (DEPTH - 6) / 2;
+    wheelGroup.add(hub, hub2);
+
+    wheelGroup.position.set(x, y, 0);
+    carGroup.add(wheelGroup);
+  }
+  addWheel(198, 234);
+  addWheel(748, 234);
+
+  carGroup.rotation.y = -0.42;
+  scene.add(carGroup);
+
+  /* soft contact shadow beneath the car */
+  const shadowCanvas = document.createElement('canvas');
+  shadowCanvas.width = shadowCanvas.height = 256;
+  const sctx = shadowCanvas.getContext('2d');
+  const grad = sctx.createRadialGradient(128,128,10,128,128,128);
+  grad.addColorStop(0, 'rgba(61,90,254,0.45)');
+  grad.addColorStop(1, 'rgba(61,90,254,0)');
+  sctx.fillStyle = grad; sctx.fillRect(0,0,256,256);
+  const shadowTex = new THREE.CanvasTexture(shadowCanvas);
+  const shadowMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(520, 220),
+    new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })
+  );
+  shadowMesh.rotation.x = -Math.PI / 2;
+  shadowMesh.position.y = -(-bb.min.y - cy) - 2; // sits just under the wheels
+  scene.add(shadowMesh);
+
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0) return;
+    renderer.setSize(rect.width, rect.height, false);
+    camera.aspect = rect.width / rect.height;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let raf, t = 0, curRotY = -0.42, curTiltX = 0;
+  function animate(){
+    raf = requestAnimationFrame(animate);
+    t += 0.006;
+    const wobble = Math.sin(t) * 0.32;               // slow automatic turntable swing
+    const targetRotY = -0.42 + wobble + heroMouseX * 0.35;
+    const targetTiltX = -heroMouseY * 0.08;
+    curRotY += (targetRotY - curRotY) * 0.04;
+    curTiltX += (targetTiltX - curTiltX) * 0.04;
+    carGroup.rotation.y = curRotY;
+    carGroup.rotation.x = curTiltX;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelAnimationFrame(raf); else animate();
+  });
+
+  // only reveal the 3D canvas (and hide the flat fallback) once we've actually rendered a frame
+  heroVisual.classList.add('has-3d');
+})();
 
 /* ==========================================================================
    RENDER: COLLECTION
