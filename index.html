@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>VELOCITY — The Art of Speed</title>
+<meta name="description" content="An interactive showcase of the world's most extraordinary supercars." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="grain"></div>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#home" class="logo">
+      <span class="logo-mark">V</span>
+      <span class="logo-text">VELOCITY</span>
+    </a>
+
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" class="nav-link active" data-target="home">Home</a></li>
+      <li><a href="#collection" class="nav-link" data-target="collection">Supercars</a></li>
+      <li><a href="#brands" class="nav-link" data-target="brands">Brands</a></li>
+      <li><a href="#compare" class="nav-link" data-target="compare">Compare</a></li>
+      <li><a href="#performance" class="nav-link" data-target="performance">Performance</a></li>
+      <li><a href="#about" class="nav-link" data-target="about">About</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="icon-btn" id="searchToggle" aria-label="Search cars">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="icon-btn hamburger" id="menuToggle" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-search" id="navSearch">
+    <input type="text" id="navSearchInput" placeholder="Search a car, brand, engine, year…" autocomplete="off">
+    <button id="navSearchClose" aria-label="Close search">&times;</button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="#home" data-target="home">Home</a></li>
+    <li><a href="#collection" data-target="collection">Supercars</a></li>
+    <li><a href="#brands" data-target="brands">Brands</a></li>
+    <li><a href="#compare" data-target="compare">Compare</a></li>
+    <li><a href="#performance" data-target="performance">Performance</a></li>
+    <li><a href="#about" data-target="about">About</a></li>
+  </ul>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="home">
+  <div class="hero-glow"></div>
+  <div class="hero-rays"></div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow"><span class="dot"></span> ISSUE NO. 026 &nbsp;—&nbsp; THE 2026 COLLECTION</p>
+    <h1 class="hero-title">
+      <span class="line">THE ART</span>
+      <span class="line">OF <em>SPEED</em></span>
+    </h1>
+    <p class="hero-sub">Explore the world's most extraordinary supercars — engineered obsession, distilled into three digits: 0–100.</p>
+    <div class="hero-actions">
+      <a href="#collection" class="btn btn-primary" data-target="collection">Explore Cars</a>
+      <a href="#compare" class="btn btn-ghost" data-target="compare">Compare Cars</a>
+    </div>
+  </div>
+
+  <div class="hero-visual" id="heroVisual">
+    <svg class="car-silhouette" id="carSilhouette" viewBox="0 0 900 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path id="carPath" d="M40 230 C60 180 120 170 175 168 C210 130 260 95 330 90 C400 84 470 90 520 105 C560 60 640 45 700 60 C760 74 800 110 835 150 C860 155 875 175 875 200 C875 220 862 232 840 234 L 800 234 C800 205 776 182 748 182 C720 182 696 205 696 234 L 250 234 C250 205 226 182 198 182 C170 182 146 205 146 234 L 70 234 C50 234 38 224 40 230 Z" stroke="url(#carGrad)" stroke-width="2.5"/>
+      <circle cx="198" cy="234" r="34" stroke="url(#wheelGrad)" stroke-width="3"/>
+      <circle cx="198" cy="234" r="14" stroke="url(#wheelGrad)" stroke-width="2"/>
+      <circle cx="748" cy="234" r="34" stroke="url(#wheelGrad)" stroke-width="3"/>
+      <circle cx="748" cy="234" r="14" stroke="url(#wheelGrad)" stroke-width="2"/>
+      <path d="M330 90 C360 128 400 140 460 140 C520 140 560 120 590 95" stroke="url(#carGrad)" stroke-width="1.5" opacity="0.6"/>
+      <defs>
+        <linearGradient id="carGrad" x1="0" y1="0" x2="900" y2="0">
+          <stop offset="0%" stop-color="#3d5afe"/>
+          <stop offset="55%" stop-color="#f5f5f7"/>
+          <stop offset="100%" stop-color="#e63946"/>
+        </linearGradient>
+        <linearGradient id="wheelGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#c9ccd1"/>
+          <stop offset="100%" stop-color="#3d5afe"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="hero-floor"></div>
+  </div>
+
+  <div class="hero-telemetry">
+    <div class="tel-item"><span class="tel-label">TOP SPEED</span><span class="tel-value" data-count="482">0</span><span class="tel-unit">km/h</span></div>
+    <div class="tel-item"><span class="tel-label">0–100 KM/H</span><span class="tel-value" data-count="2" data-decimal="6">0</span><span class="tel-unit">sec</span></div>
+    <div class="tel-item"><span class="tel-label">CARS CATALOGUED</span><span class="tel-value" data-count="20">0</span><span class="tel-unit">models</span></div>
+  </div>
+
+  <a href="#collection" class="scroll-cue" data-target="collection" aria-label="Scroll down">
+    <span>SCROLL</span>
+    <div class="scroll-line"><i></i></div>
+  </a>
+</header>
+
+<main>
+
+<!-- ============ COLLECTION ============ -->
+<section class="section" id="collection">
+  <div class="section-head reveal">
+    <p class="eyebrow">01 / COLLECTION</p>
+    <h2>The Garage</h2>
+    <p class="section-sub">Twenty of the most obsessive engineering exercises on four wheels. Filter, sort, and study every one.</p>
+  </div>
+
+  <div class="controls reveal">
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="collectionSearch" placeholder="Search by name, brand, engine, year...">
+    </div>
+
+    <div class="filter-row">
+      <select id="filterBrand"><option value="">All Brands</option></select>
+      <select id="filterEngine"><option value="">All Engines</option></select>
+      <select id="sortBy">
+        <option value="default">Featured</option>
+        <option value="fastest">Fastest (Top Speed)</option>
+        <option value="power">Most Powerful</option>
+        <option value="accel">Quickest 0–100</option>
+        <option value="cheap">Cheapest</option>
+        <option value="expensive">Most Expensive</option>
+        <option value="newest">Newest</option>
+      </select>
+      <button class="filter-toggle" id="advFilterToggle">Filters <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+
+    <div class="adv-filters" id="advFilters">
+      <div class="range-filter">
+        <label>Price up to <span id="priceOut">$5,000,000+</span></label>
+        <input type="range" id="priceRange" min="200000" max="5000000" step="50000" value="5000000">
+      </div>
+      <div class="range-filter">
+        <label>Min Horsepower <span id="hpOut">0 hp</span></label>
+        <input type="range" id="hpRange" min="0" max="1600" step="25" value="0">
+      </div>
+      <div class="range-filter">
+        <label>Max 0–100 km/h <span id="accelOut">10.0s</span></label>
+        <input type="range" id="accelRange" min="1.5" max="10" step="0.1" value="10">
+      </div>
+    </div>
+  </div>
+
+  <p class="results-count" id="resultsCount"></p>
+
+  <div class="car-grid" id="carGrid"></div>
+  <p class="no-results" id="noResults" hidden>No cars match those filters. Try widening your search.</p>
+</section>
+
+<!-- ============ BRANDS ============ -->
+<section class="section section-alt" id="brands">
+  <div class="section-head reveal">
+    <p class="eyebrow">02 / MANUFACTURERS</p>
+    <h2>Ten Houses of Obsession</h2>
+    <p class="section-sub">Every marque on this page has bet its identity on a single idea taken to its extreme.</p>
+  </div>
+  <div class="brand-grid" id="brandGrid"></div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section class="section" id="compare">
+  <div class="section-head reveal">
+    <p class="eyebrow">03 / HEAD TO HEAD</p>
+    <h2>Compare Cars</h2>
+    <p class="section-sub">Put two machines on the same page and let the numbers argue.</p>
+  </div>
+
+  <div class="compare-wrap reveal">
+    <div class="compare-side" id="compareA">
+      <label>Car A</label>
+      <select id="selectA"></select>
+      <div class="compare-card" id="cardA"></div>
+    </div>
+
+    <div class="compare-vs">VS</div>
+
+    <div class="compare-side" id="compareB">
+      <label>Car B</label>
+      <select id="selectB"></select>
+      <div class="compare-card" id="cardB"></div>
+    </div>
+  </div>
+
+  <div class="compare-bars" id="compareBars"></div>
+</section>
+
+<!-- ============ PERFORMANCE ============ -->
+<section class="section section-alt" id="performance">
+  <div class="section-head reveal">
+    <p class="eyebrow">04 / TELEMETRY</p>
+    <h2>Performance Board</h2>
+    <p class="section-sub">Select a car to read its full telemetry against the field.</p>
+  </div>
+
+  <div class="perf-select reveal">
+    <select id="perfCarSelect"></select>
+  </div>
+
+  <div class="perf-gauges" id="perfGauges"></div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="section about" id="about">
+  <div class="about-inner reveal">
+    <p class="eyebrow">05 / MANIFESTO</p>
+    <h2>Why we built this</h2>
+    <p>VELOCITY exists for one reason: supercars are rolling arguments about what matters — grip over comfort,
+      grams over convenience, sound over silence. We catalogue them the way a horologist catalogues movements:
+      obsessively, by the numbers, without apology.</p>
+    <p>Every specification on this page is presented as published by each manufacturer at launch. Consider it
+      a living reference, not a showroom — built for the 2 a.m. rabbit hole, not the sales pitch.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ CAR DETAIL MODAL ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="carModal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    <div class="modal-content" id="modalContent"></div>
+    <button class="btn btn-ghost modal-back" id="modalBack">← Back to Collection</button>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="logo">
+        <span class="logo-mark">V</span>
+        <span class="logo-text">VELOCITY</span>
+      </div>
+      <p>Driven by performance. Designed for obsession.</p>
+      <button class="sound-toggle" id="soundToggle" aria-pressed="false">
+        <svg viewBox="0 0 24 24" id="soundIcon"><path d="M11 5 6 9H2v6h4l5 4V5Z"/></svg>
+        <span>Interface sound: <em id="soundState">off</em></span>
+      </button>
+    </div>
+
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="#collection" data-target="collection">Supercars</a>
+        <a href="#brands" data-target="brands">Brands</a>
+        <a href="#compare" data-target="compare">Compare</a>
+        <a href="#performance" data-target="performance">Performance</a>
+        <a href="#about" data-target="about">About</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:press@velocity.cars">press@velocity.cars</a>
+        <a href="#">Press Kit</a>
+        <a href="#">Careers</a>
+      </div>
+    </div>
+
+    <div class="footer-social">
+      <h4>Follow</h4>
+      <div class="social-icons">
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+        <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M4 4l16 16M20 4 4 20"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><polygon points="10 9 15 12 10 15"/></svg></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; 2026 Velocity. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
